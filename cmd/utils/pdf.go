@@ -10,6 +10,7 @@ const (
 	aliasNumPages = "NP"
 	logoPath      = "cmd/data/assets/revolut.png"
 	qrPath        = "cmd/data/assets/qr.png"
+	watermarkPath = "cmd/data/assets/watermark.png"
 )
 
 func CreatePDF(invoice *Invoice, outputName string) {
@@ -23,7 +24,7 @@ func CreatePDF(invoice *Invoice, outputName string) {
 	pdf.SetMargins(10, 10, 10)
 
 	// Add header and footer
-	header(pdf, invoice, logoPath)
+	header(pdf, invoice, logoPath, watermarkPath) // add watermark in the header so it will be on every page
 	footer(pdf, qrPath)
 
 	// Add a page
@@ -46,7 +47,7 @@ func CreatePDF(invoice *Invoice, outputName string) {
 	}
 }
 
-func header(pdf *gofpdf.Fpdf, invoice *Invoice, logoPath string) {
+func header(pdf *gofpdf.Fpdf, invoice *Invoice, logoPath string, watermarkPath string) {
 	pdf.SetHeaderFunc(func() {
 		// Add logo to the header
 		pdf.Image(logoPath, 7, 7, 30, 0, false, "", 0, "")
@@ -66,6 +67,9 @@ func header(pdf *gofpdf.Fpdf, invoice *Invoice, logoPath string) {
 		pdf.SetXY(170, 19) // Adjust Y position to place the text below "EUR STATEMENT"
 		pdf.SetFont("Arial", "I", 6)
 		pdf.CellFormat(30, 10, "Revolut Ltd", "", 1, "R", false, 0, "")
+
+		// add watermark
+		watermark(pdf, watermarkPath)
 	})
 }
 
@@ -321,4 +325,13 @@ func AllTransactions(pdf gofpdf.Pdf, invoice *Invoice) {
 
 		availableSpace -= 10
 	}
+}
+
+func watermark(pdf *gofpdf.Fpdf, watermarkPath string) {
+
+	// place in the middle of the page
+	pdf.TransformBegin()
+	pdf.TransformRotate(35, 105, 105)
+	pdf.Image(watermarkPath, 40, 135, 90, 0, false, "", 0, "")
+	pdf.TransformEnd()
 }
